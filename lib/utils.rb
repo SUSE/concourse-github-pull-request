@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'octokit'
 
 # The error raised when an assertion is not met
 class AssertionError < RuntimeError; end
@@ -43,6 +44,16 @@ module Utils
     end
 
     repo_name
+  end
+
+  # Client returns a github client based on the
+  #
+  # @return [Octokit::Client] Returns a github client
+  def client
+    return @client if @client
+    token = config['source']['access_token']
+    @client = Octokit::Client.new(access_token: token,
+                                  auto_paginate: true)
   end
 
   # Spawn a process and return its status

@@ -109,15 +109,6 @@ class ResourceCheck
                          target_url: url)
   end
 
-  # Client returns a github client based on the
-  #
-  # @return [Octokit::Client] Returns a github client
-  def client
-    token = config['source']['access_token']
-    @client ||= Octokit::Client.new(access_token: token,
-                                    auto_paginate: true)
-  end
-
   # Check for new PR commits
   #
   # @return [Array] The result of the check as a hash as per concourse docs.

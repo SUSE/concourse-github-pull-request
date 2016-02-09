@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# vim: set syntax=ruby :
 
 require_relative 'utils'
 
@@ -65,16 +64,6 @@ class ResourceIn
     parts = version.split(':')
     parts[0] = parts[0].gsub(/pr/, '').to_i
     parts
-  end
-
-  # Client returns a github client based on the
-  #
-  # @return [Octokit::Client] Returns a github client
-  def client
-    return @client if @client
-    token = config['source']['access_token']
-    @client = Octokit::Client.new(access_token: token,
-                                  auto_paginate: true)
   end
 
   # out_path is the output path specified by concourse

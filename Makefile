@@ -1,4 +1,4 @@
-NAME ?= mookas/concourse-github-pr-resource:latest
+NAME ?= aarondl0/concourse-github-pr-resource:latest
 
 SOURCES := \
 	bin/ \
