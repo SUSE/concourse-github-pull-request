@@ -16,6 +16,8 @@ RUN true \
         ruby-json \
         zlib \
         zlib-dev \
+        openssl \
+        ca-certificates \
     && echo "gem: --no-doc" | tee /etc/gemrc \
     && cd /opt/concourse-github-pr-resource \
     && bundle config build.nokogiri --use-system-libraries \
