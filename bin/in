@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# vim: set syntax=ruby :
+
+require 'json'
+require_relative '../lib/in'
+require_relative '../lib/utils'
+begin
+  puts ResourceIn.new.run.to_json
+rescue AssertionError => ex
+  STDERR.puts ex.message
+  exit 1
+end

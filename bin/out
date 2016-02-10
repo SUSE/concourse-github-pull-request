@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require_relative '../lib/out'
+require_relative '../lib/utils'
+begin
+  puts ResourceOut.new.run.to_json
+rescue AssertionError => ex
+  STDERR.puts ex.message
+  exit 1
+end
