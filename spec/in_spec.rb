@@ -13,7 +13,7 @@ context ResourceIn do
   let(:config) do
     {
       'source' => { 'uri' => uri, 'branch' => branch },
-      'version' => version
+      'version' => { 'commit' => version }
     }
   end
   let(:metatime) { Time.new(2001, 01, 01, 1, 1, 1) }

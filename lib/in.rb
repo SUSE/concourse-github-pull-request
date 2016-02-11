@@ -145,8 +145,7 @@ class ResourceIn
   #                  here is essentially the git commit information.
   def run
     source = config['source']
-    version = config['version']
-    pr_num, sha = ResourceIn.parse_version(version)
+    pr_num, sha = ResourceIn.parse_version(config['version']['commit'])
 
     uri = source['uri']
     repo = get_repo_name(uri)
