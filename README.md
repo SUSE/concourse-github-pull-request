@@ -27,6 +27,6 @@ a PR (the latest commit on any PR that doesn't have it's check).
 
 Pulls down a pull request ref from github.
 
-### `out`: Upload an object to storage.
+### `out`: This is a no-op.
 
 *None*.

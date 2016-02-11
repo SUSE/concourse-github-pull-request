@@ -7,8 +7,8 @@ context ResourceCheck do
   let(:repo) { 'https://github.com/hpcloud/fun' }
   let(:sha1) { 'abdcef' }
   let(:sha2) { 'fecdba' }
-  let(:commit1) { { commit: { tree: { sha: sha1 } } } }
-  let(:commit2) { { commit: { tree: { sha: sha2 } } } }
+  let(:commit1) { { sha: sha1 } }
+  let(:commit2) { { sha: sha2 } }
   let(:commits) { mk_structs([commit1, commit2]) }
 
   it 'should run fetch the PR details for the next untouched PR' do
@@ -19,10 +19,13 @@ context ResourceCheck do
       ]))
     allow(client).to receive(:pull_request_commits).and_return(commits)
     allow(client).to receive(:statuses).and_return(mk_structs([
-      { context: ResourceCheck::STATUS_NAME, status: 'success' }
+      { context: ResourceCheck::STATUS_NAME, state: 'success' }
     ]), mk_structs([
-      { context: 'wrong check', status: 'failure' }
+      { context: 'wrong check', state: 'failure' }
     ]))
+
+    expect(ResourceCheck).to receive(:set_commit_status)
+      .with(client, 'hpcloud/fun', sha2)
 
     r = ResourceCheck.new(
       client: client, config: { 'source' => { 'uri' => repo } }
@@ -37,9 +40,9 @@ context ResourceCheck do
     allow(client).to receive(:pull_request_commits).and_return(commits)
 
     allow(client).to receive(:statuses).and_return(mk_structs([
-      { context: ResourceCheck::STATUS_NAME, status: 'success' }
+      { context: ResourceCheck::STATUS_NAME, state: 'success' }
     ]), mk_structs([
-      { context: 'wrong check', status: 'failure' }
+      { context: 'wrong check', state: 'failure' }
     ]))
 
     prs = mk_structs([
@@ -55,8 +58,8 @@ context ResourceCheck do
   describe 'fetch_prs' do
     it 'should fetch prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'master' } },
-        { base: { label: 'master' } }
+        { base: { label: 'hpcloud:master' } },
+        { base: { label: 'hpcloud:master' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo)
@@ -65,13 +68,13 @@ context ResourceCheck do
 
     it 'should filter fetched prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'master' } },
-        { base: { label: 'develop' } }
+        { base: { label: 'hpcloud:master' } },
+        { base: { label: 'hpcloud:develop' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo, branch: 'develop')
       expect(prs.length).to eq(1)
-      expect(prs[0].base.label).to eq('develop')
+      expect(prs[0].base.label).to eq('hpcloud:develop')
     end
   end
 
@@ -87,8 +90,8 @@ context ResourceCheck do
   describe 'commit_has_status?' do
     it 'should check if a commit has the status' do
       allow(client).to receive(:statuses).and_return(mk_structs([
-        { context: 'not the right status', status: 'failure' },
-        { context: ResourceCheck::STATUS_NAME, status: 'success' }
+        { context: 'not the right status', state: 'failure' },
+        { context: ResourceCheck::STATUS_NAME, state: 'success' }
       ]))
 
       status = ResourceCheck.commit_has_status?(client, repo, 'sha')
@@ -97,8 +100,8 @@ context ResourceCheck do
 
     it 'should check if a commit does not have the status' do
       allow(client).to receive(:statuses).and_return(mk_structs([
-        { context: 'not the right status', status: 'failure' },
-        { context: ResourceCheck::STATUS_NAME, status: 'failure' }
+        { context: 'not the right status', state: 'failure' },
+        { context: ResourceCheck::STATUS_NAME, state: 'failure' }
       ]))
 
       status = ResourceCheck.commit_has_status?(client, repo, 'sha')
@@ -111,7 +114,7 @@ context ResourceCheck do
 
     it 'should return nil if the pr is touched' do
       statuses = mk_structs([
-        { context: ResourceCheck::STATUS_NAME, status: 'success' }
+        { context: ResourceCheck::STATUS_NAME, state: 'success' }
       ])
 
       allow(client).to receive(:pull_request_commits).and_return(commits)
@@ -144,11 +147,10 @@ context ResourceCheck do
       allow(client).to receive(:create_status)
         .with(repo, 'sha', 'success',
               context: ResourceCheck::STATUS_NAME,
-              description: ResourceCheck::STATUS_DESCRIPTION,
-              target_url: 'url')
+              description: ResourceCheck::STATUS_DESCRIPTION)
         .and_return(nil)
 
-      status = ResourceCheck.set_commit_status(client, repo, 'sha', 'url')
+      status = ResourceCheck.set_commit_status(client, repo, 'sha')
       expect(status).to be_nil
     end
   end

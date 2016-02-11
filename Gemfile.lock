@@ -69,6 +69,7 @@ PLATFORMS
 DEPENDENCIES
   concourse-github-pr-resource!
   inch
+  octokit
   pry
   recursive-open-struct
   rspec

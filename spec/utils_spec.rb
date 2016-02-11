@@ -62,7 +62,7 @@ context Utils do
     end
 
     it 'should take git urls' do
-      uri = 'git@github.com:hpcloud/fun'
+      uri = 'git@github.com:hpcloud/fun.git'
       repo_name = subject.get_repo_name(uri)
       expect(repo_name).to eq('hpcloud/fun')
     end

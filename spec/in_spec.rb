@@ -13,7 +13,7 @@ context ResourceIn do
   let(:config) do
     {
       'source' => { 'uri' => uri, 'branch' => branch },
-      'version' => version
+      'version' => { 'commit' => version }
     }
   end
   let(:metatime) { Time.new(2001, 01, 01, 1, 1, 1) }
@@ -53,13 +53,11 @@ context ResourceIn do
 
   it 'should return the version and the metadata when run' do
     expect(client).to receive(:commit).and_return(metadata)
-    expect(ResourceIn).not_to receive(:write_ssh_config)
-    expect(ResourceIn).not_to receive(:write_private_key)
 
     resource = ResourceIn.new(client: client, config: config)
     expect(resource).to receive(:out_path).and_return('out')
     expect(ResourceIn).to receive(:clone)
-      .with(uri, nil, pr_num, 'out')
+      .with(uri, pr_num, sha, 'out', pkey: nil)
       .and_return(nil)
 
     output = resource.run
@@ -80,6 +78,7 @@ context ResourceIn do
   end
 
   it 'should clone a repository' do
+    expect(FileUtils).to receive(:mkdir_p).with('dir')
     expect(Dir).to receive(:chdir) do |_dir, &block|
       block.call
     end
@@ -87,7 +86,11 @@ context ResourceIn do
     ref = "refs/pull/#{pr_num}/head:pr"
 
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'clone', '--depth', '1', repo, 'dir')
+      .with('git', 'init')
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(ResourceIn).to receive(:spawn)
+      .with('git', 'remote', 'add', 'origin', uri)
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
@@ -95,18 +98,18 @@ context ResourceIn do
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'checkout', 'pr')
+      .with('git', 'checkout', sha)
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'submodule', '--init', '--recursive')
+      .with(*'git submodule update --init --recursive --depth 1'.split)
       .and_return(OpenStruct.new(success?: true))
       .ordered
 
     expect(ResourceIn).to receive(:write_ssh_config)
     expect(ResourceIn).to receive(:write_private_key).with('pkey')
 
-    ResourceIn.clone(repo, 'pkey', pr_num, 'dir')
+    ResourceIn.clone(uri, pr_num, sha, 'dir', pkey: 'pkey')
   end
 
   it 'should write the ssh directory' do
@@ -164,20 +167,11 @@ context ResourceIn do
       end.to raise_error(AssertionError, /output directory.*not supplied/i)
     end
 
-    it 'should abort if the output directory is missing' do
-      expect(ARGV).to receive(:first).and_return('out')
-      expect do
-        subject.out_path
-      end.to raise_error(AssertionError, /output directory.*not a directory/i)
-    end
-
     it 'should return the output directory if valid' do
       out_dir = 'out'
 
-      expect(File).to receive(:directory?).with(out_dir).and_return(true)
       expect(ARGV).to receive(:first).and_return(out_dir)
-      expect(subject).to receive(:file_name).and_return('file-name')
-      expect(subject.out_path).to eq(File.join(out_dir, 'file-name'))
+      expect(subject.out_path).to eq(out_dir)
     end
   end
 end
