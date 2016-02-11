@@ -4,8 +4,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Github pull requests as a concourse resource'
   s.description = <<-EOF
     This is an implementation of a concourse (http://concourse.ci/) resource
-    using the octokit gem (http://octokit.github.io/) for accessing pull
-    requests.
+    for accessing pull requests.
   EOF
   s.homepage    = 'https://github.com/hpcloud/concourse-github-pr-resource'
   s.authors     = ['Aaron L']
