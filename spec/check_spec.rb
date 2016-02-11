@@ -19,9 +19,9 @@ context ResourceCheck do
       ]))
     allow(client).to receive(:pull_request_commits).and_return(commits)
     allow(client).to receive(:statuses).and_return(mk_structs([
-      { context: ResourceCheck::STATUS_NAME, status: 'success' }
+      { context: ResourceCheck::STATUS_NAME, state: 'success' }
     ]), mk_structs([
-      { context: 'wrong check', status: 'failure' }
+      { context: 'wrong check', state: 'failure' }
     ]))
 
     expect(ResourceCheck).to receive(:set_commit_status)
@@ -40,9 +40,9 @@ context ResourceCheck do
     allow(client).to receive(:pull_request_commits).and_return(commits)
 
     allow(client).to receive(:statuses).and_return(mk_structs([
-      { context: ResourceCheck::STATUS_NAME, status: 'success' }
+      { context: ResourceCheck::STATUS_NAME, state: 'success' }
     ]), mk_structs([
-      { context: 'wrong check', status: 'failure' }
+      { context: 'wrong check', state: 'failure' }
     ]))
 
     prs = mk_structs([
@@ -90,8 +90,8 @@ context ResourceCheck do
   describe 'commit_has_status?' do
     it 'should check if a commit has the status' do
       allow(client).to receive(:statuses).and_return(mk_structs([
-        { context: 'not the right status', status: 'failure' },
-        { context: ResourceCheck::STATUS_NAME, status: 'success' }
+        { context: 'not the right status', state: 'failure' },
+        { context: ResourceCheck::STATUS_NAME, state: 'success' }
       ]))
 
       status = ResourceCheck.commit_has_status?(client, repo, 'sha')
@@ -100,8 +100,8 @@ context ResourceCheck do
 
     it 'should check if a commit does not have the status' do
       allow(client).to receive(:statuses).and_return(mk_structs([
-        { context: 'not the right status', status: 'failure' },
-        { context: ResourceCheck::STATUS_NAME, status: 'failure' }
+        { context: 'not the right status', state: 'failure' },
+        { context: ResourceCheck::STATUS_NAME, state: 'failure' }
       ]))
 
       status = ResourceCheck.commit_has_status?(client, repo, 'sha')
@@ -114,7 +114,7 @@ context ResourceCheck do
 
     it 'should return nil if the pr is touched' do
       statuses = mk_structs([
-        { context: ResourceCheck::STATUS_NAME, status: 'success' }
+        { context: ResourceCheck::STATUS_NAME, state: 'success' }
       ])
 
       allow(client).to receive(:pull_request_commits).and_return(commits)

@@ -89,11 +89,9 @@ class ResourceCheck
   # @return       [Bool] Whether or not the status was on the commit
   def self.commit_has_status?(client, repo, sha)
     statuses = client.statuses(repo, sha)
-    found = statuses.find do |s|
+    statuses.any? do |s|
       s.context == STATUS_NAME && s.state == 'success'
     end
-
-    found != nil
   end
 
   # Set the commit status

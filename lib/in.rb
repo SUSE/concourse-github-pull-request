@@ -124,7 +124,7 @@ class ResourceIn
   # @return        [Array] The two parts of the version string
   def self.parse_version(version)
     parts = version.split(':')
-    parts[0] = parts[0].gsub(/pr/, '').to_i
+    parts[0] = parts[0].sub(/^pr/, '').to_i
     parts
   end
 
