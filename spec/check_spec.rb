@@ -58,8 +58,8 @@ context ResourceCheck do
   describe 'fetch_prs' do
     it 'should fetch prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'master' } },
-        { base: { label: 'master' } }
+        { base: { label: 'hpcloud:master' } },
+        { base: { label: 'hpcloud:master' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo)
@@ -68,13 +68,13 @@ context ResourceCheck do
 
     it 'should filter fetched prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'master' } },
-        { base: { label: 'develop' } }
+        { base: { label: 'hpcloud:master' } },
+        { base: { label: 'hpcloud:develop' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo, branch: 'develop')
       expect(prs.length).to eq(1)
-      expect(prs[0].base.label).to eq('develop')
+      expect(prs[0].base.label).to eq('hpcloud:develop')
     end
   end
 

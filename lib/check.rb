@@ -46,8 +46,11 @@ class ResourceCheck
   # @return       [PullRequest] PullRequest objects from Octokit
   def self.fetch_prs(client, repo, branch: nil)
     prs = client.pull_requests(repo, state: 'open')
-    prs.reject! { |pr| pr.base.label != branch } if branch
-    prs
+    return prs if branch.nil?
+    prs.reject! do |pr|
+      base_name = pr.base.label.split(':').last
+      base_name != branch
+    end
   end
 
   # Get all commits associated with PRs
