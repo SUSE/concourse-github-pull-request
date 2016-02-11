@@ -76,11 +76,8 @@ class ResourceCheck
   # @return       [String] SHA hash of the commit without the status or nil
   def self.untouched_commit_for_pr(client, repo, pr_num)
     latest_commit = fetch_pr_commits(client, repo, pr_num).last
-    return nil if latest_commit.nil? ||
-                  commit_has_status?(client,
-                                     repo,
-                                     latest_commit.sha)
-
+    return nil if latest_commit.nil?
+    return nil if commit_has_status?(client, repo, latest_commit.sha)
     latest_commit.sha
   end
 
@@ -108,11 +105,12 @@ class ResourceCheck
                          description: STATUS_DESCRIPTION)
   end
 
-  # Get the next pr to look at's last commit
+  # Get the next pr to run through the pipeline
   #
   # @param client [Octokit::Client] The github client
   # @param repo   [String] Repository name.
   # @param branch [String] The branch base to filter prs on
+  # @return       [Hash]   { sha: "lastcommithash", pr: [Sawyer::Resource] }
   def get_next_pr(client, repo, branch: nil)
     prs = ResourceCheck.fetch_prs(client, repo, branch: branch)
     ResourceCheck.filter_touched_prs(client, repo, prs).first
