@@ -56,13 +56,13 @@ context Utils do
 
   describe 'repo_name' do
     it 'should take http/https urls' do
-      uri = 'https://github.com/hpcloud/fun'
+      uri = 'https://github.com/hpcloud/fun.git'
       repo_name = subject.get_repo_name(uri)
       expect(repo_name).to eq('hpcloud/fun')
     end
 
     it 'should take git urls' do
-      uri = 'git@github.com:hpcloud/fun'
+      uri = 'git@github.com:hpcloud/fun.git'
       repo_name = subject.get_repo_name(uri)
       expect(repo_name).to eq('hpcloud/fun')
     end

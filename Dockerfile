@@ -5,6 +5,7 @@ ADD . /opt/concourse-github-pr-resource/
 RUN true \
     && apk add --update \
         build-base \
+        git \
         libxml2 \
         libxml2-dev \
         libxslt \
@@ -16,6 +17,7 @@ RUN true \
         ruby-json \
         zlib \
         zlib-dev \
+        openssh \
         openssl \
         ca-certificates \
     && echo "gem: --no-doc" | tee /etc/gemrc \

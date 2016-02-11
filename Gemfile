@@ -2,6 +2,8 @@ source(ENV['RUBYGEMS_MIRROR'] || 'https://rubygems.org')
 
 gem 'concourse-github-pr-resource', path: '.'
 
+gem 'octokit'
+
 group :development do
   gem 'pry'
 end

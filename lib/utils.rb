@@ -43,7 +43,7 @@ module Utils
       repo_name = repo_uri.split(':')[1]
     end
 
-    repo_name
+    repo_name.gsub(/\.git/, '')
   end
 
   # Client returns a github client based on the

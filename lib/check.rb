@@ -8,7 +8,7 @@ class ResourceCheck
   include Utils
 
   STATUS_NAME        = 'ci-seen'
-  STATUS_DESCRIPTION = 'Check to see if ci has seen this commit'
+  STATUS_DESCRIPTION = 'Check to show that ci has queued this commit'
 
   # Create a constructor that allows injection of parameters
   # mostly for testing or for defining custom clients and configs.
@@ -76,9 +76,9 @@ class ResourceCheck
     return nil if latest_commit.nil? ||
                   commit_has_status?(client,
                                      repo,
-                                     latest_commit.commit.tree.sha)
+                                     latest_commit.sha)
 
-    latest_commit.commit.tree.sha
+    latest_commit.sha
   end
 
   # Check if a commit has the status
@@ -90,7 +90,7 @@ class ResourceCheck
   def self.commit_has_status?(client, repo, sha)
     statuses = client.statuses(repo, sha)
     found = statuses.find do |s|
-      s.context == STATUS_NAME && s.status == 'success'
+      s.context == STATUS_NAME && s.state == 'success'
     end
 
     found != nil
@@ -101,12 +101,20 @@ class ResourceCheck
   # @param client [Octokit::Client] The client to fetch commits with
   # @param repo   [String] Repository name.
   # @param sha    [String] The sha of the ref to check.
-  # @param url    [String] URL to attach to the status.
-  def self.set_commit_status(client, repo, sha, url)
+  def self.set_commit_status(client, repo, sha)
     client.create_status(repo, sha, 'success',
                          context: STATUS_NAME,
-                         description: STATUS_DESCRIPTION,
-                         target_url: url)
+                         description: STATUS_DESCRIPTION)
+  end
+
+  # Get the next pr to look at's last commit
+  #
+  # @param client [Octokit::Client] The github client
+  # @param repo   [String] Repository name.
+  # @param branch [String] The branch base to filter prs on
+  def get_next_pr(client, repo, branch: nil)
+    prs = ResourceCheck.fetch_prs(client, repo, branch: branch)
+    ResourceCheck.filter_touched_prs(client, repo, prs).first
   end
 
   # Check for new PR commits
@@ -119,12 +127,11 @@ class ResourceCheck
     source = config['source']
     repo = get_repo_name(source['uri'])
 
-    prs = ResourceCheck.fetch_prs(client, repo, branch: source['branch'])
-    pr_commits = ResourceCheck.filter_touched_prs(client, repo, prs)
+    next_pr = get_next_pr(client, repo, branch: source['branch'])
+    return [] if next_pr.nil?
 
-    return [] if pr_commits.empty?
+    ResourceCheck.set_commit_status(client, repo, next_pr[:sha])
 
-    next_pr = pr_commits.first
     [{ 'commit' => "pr#{next_pr[:pr].number}:#{next_pr[:sha]}" }]
   end
 end

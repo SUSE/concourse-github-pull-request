@@ -7,8 +7,8 @@ context ResourceCheck do
   let(:repo) { 'https://github.com/hpcloud/fun' }
   let(:sha1) { 'abdcef' }
   let(:sha2) { 'fecdba' }
-  let(:commit1) { { commit: { tree: { sha: sha1 } } } }
-  let(:commit2) { { commit: { tree: { sha: sha2 } } } }
+  let(:commit1) { { sha: sha1 } }
+  let(:commit2) { { sha: sha2 } }
   let(:commits) { mk_structs([commit1, commit2]) }
 
   it 'should run fetch the PR details for the next untouched PR' do
@@ -23,6 +23,9 @@ context ResourceCheck do
     ]), mk_structs([
       { context: 'wrong check', status: 'failure' }
     ]))
+
+    expect(ResourceCheck).to receive(:set_commit_status)
+      .with(client, 'hpcloud/fun', sha2)
 
     r = ResourceCheck.new(
       client: client, config: { 'source' => { 'uri' => repo } }
@@ -144,11 +147,10 @@ context ResourceCheck do
       allow(client).to receive(:create_status)
         .with(repo, 'sha', 'success',
               context: ResourceCheck::STATUS_NAME,
-              description: ResourceCheck::STATUS_DESCRIPTION,
-              target_url: 'url')
+              description: ResourceCheck::STATUS_DESCRIPTION)
         .and_return(nil)
 
-      status = ResourceCheck.set_commit_status(client, repo, 'sha', 'url')
+      status = ResourceCheck.set_commit_status(client, repo, 'sha')
       expect(status).to be_nil
     end
   end

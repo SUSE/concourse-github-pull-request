@@ -164,20 +164,11 @@ context ResourceIn do
       end.to raise_error(AssertionError, /output directory.*not supplied/i)
     end
 
-    it 'should abort if the output directory is missing' do
-      expect(ARGV).to receive(:first).and_return('out')
-      expect do
-        subject.out_path
-      end.to raise_error(AssertionError, /output directory.*not a directory/i)
-    end
-
     it 'should return the output directory if valid' do
       out_dir = 'out'
 
-      expect(File).to receive(:directory?).with(out_dir).and_return(true)
       expect(ARGV).to receive(:first).and_return(out_dir)
-      expect(subject).to receive(:file_name).and_return('file-name')
-      expect(subject.out_path).to eq(File.join(out_dir, 'file-name'))
+      expect(subject.out_path).to eq(out_dir)
     end
   end
 end

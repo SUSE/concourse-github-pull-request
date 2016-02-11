@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
-require 'utils'
+require_relative 'utils'
 
 # ResourceIn implements the `in` command to download a ref.
 class ResourceIn
@@ -135,8 +135,7 @@ class ResourceIn
     return @out_path if @out_path
     outdir = ARGV.first
     assert outdir, 'Output directory not supplied'
-    assert File.directory?(outdir), "Output directory #{outdir} not a directory"
-    @out_path = File.join(outdir, File.basename(file_name))
+    @out_path = outdir
   end
 
   # Clone PR into the given directory
@@ -152,7 +151,7 @@ class ResourceIn
     uri = source['uri']
     repo = get_repo_name(uri)
 
-    meta = ResourceIn.get_commit_metadata(client, repo, version)
+    meta = ResourceIn.get_commit_metadata(client, repo, sha)
     ResourceIn.clone(uri, source['private_key'], pr_num, out_path)
 
     { version: sha, metadata: meta }
