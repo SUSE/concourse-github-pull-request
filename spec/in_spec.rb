@@ -53,13 +53,11 @@ context ResourceIn do
 
   it 'should return the version and the metadata when run' do
     expect(client).to receive(:commit).and_return(metadata)
-    expect(ResourceIn).not_to receive(:write_ssh_config)
-    expect(ResourceIn).not_to receive(:write_private_key)
 
     resource = ResourceIn.new(client: client, config: config)
     expect(resource).to receive(:out_path).and_return('out')
     expect(ResourceIn).to receive(:clone)
-      .with(uri, nil, pr_num, 'out')
+      .with(uri, pr_num, sha, 'out', pkey: nil)
       .and_return(nil)
 
     output = resource.run
@@ -80,6 +78,7 @@ context ResourceIn do
   end
 
   it 'should clone a repository' do
+    expect(FileUtils).to receive(:mkdir_p).with('dir')
     expect(Dir).to receive(:chdir) do |_dir, &block|
       block.call
     end
@@ -87,7 +86,11 @@ context ResourceIn do
     ref = "refs/pull/#{pr_num}/head:pr"
 
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'clone', '--depth', '1', repo, 'dir')
+      .with('git', 'init')
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(ResourceIn).to receive(:spawn)
+      .with('git', 'remote', 'add', 'origin', uri)
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
@@ -95,18 +98,18 @@ context ResourceIn do
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'checkout', 'pr')
+      .with('git', 'checkout', sha)
       .and_return(OpenStruct.new(success?: true))
       .ordered
     expect(ResourceIn).to receive(:spawn)
-      .with('git', 'submodule', '--init', '--recursive')
+      .with(*'git submodule update --init --recursive --depth 1'.split)
       .and_return(OpenStruct.new(success?: true))
       .ordered
 
     expect(ResourceIn).to receive(:write_ssh_config)
     expect(ResourceIn).to receive(:write_private_key).with('pkey')
 
-    ResourceIn.clone(repo, 'pkey', pr_num, 'dir')
+    ResourceIn.clone(uri, pr_num, sha, 'dir', pkey: 'pkey')
   end
 
   it 'should write the ssh directory' do

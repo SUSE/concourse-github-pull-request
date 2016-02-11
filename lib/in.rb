@@ -28,47 +28,63 @@ class ResourceIn
   end
 
   # Clone the repository into the source path at some PR ref.
-  # Shells out to git.
+  # Shells out to git. Always write the private key to ensure that
+  # submodules are always checked out correctly.
   #
   # @param uri    [String]  The name of the repository.
-  # @param pkey   [String]  Private key to check out with
   # @param pr_num [Integer] The PR number.
+  # @param sha    [String]  The commit hash to check out
   # @param dir    [String]  Directory to clone to
-  def self.clone(uri, pkey, pr_num, dir)
+  # @param pkey   [String]  Private key to check out with
+  def self.clone(uri, pr_num, sha, dir, pkey: nil)
     unless pkey.nil?
       write_ssh_config
       write_private_key(pkey)
     end
 
-    status = spawn('git', 'clone', '--depth', '1', uri, dir)
-    fail StandardError, "failed to clone repo: #{uri}" unless status.success?
+    FileUtils.mkdir_p(dir)
 
     Dir.chdir(dir) do
-      checkout_pr(pr_num)
+      checkout_pr(uri, pr_num, sha)
     end
   end
 
-  # Fetch and checkout a pr
+  # Fetch and checkout a pr at some commit hash
   #
+  # @param uri    [String]  The URI of the github repo.
+  # @param sha    [String]  The commit hash to check out
   # @param pr_num [Integer] The PR number.
-  def self.checkout_pr(pr_num)
-    cmds = [
-      "git fetch --depth 1 origin refs/pull/#{pr_num}/head:pr",
-      'git checkout pr',
-      'git submodule --init --recursive'
-    ]
-
-    cmds.each do |cmd|
+  def self.checkout_pr(uri, pr_num, sha)
+    checkout_commands(uri, pr_num, sha).each do |cmd|
       status = spawn(*cmd.split(' '))
       fail StandardError, "failed running: #{cmd}" unless status.success?
     end
   end
 
-  # Create the ssh_dir if it doesn't exist
+  # Create a list of git commands to check out a given ref from a PR
+  #
+  # @param uri    [String]  The URI of the github repo.
+  # @param sha    [String]  The commit hash to check out
+  # @param pr_num [Integer] The PR number.
+  # @return       [Array]   Array of git commands to run
+  def self.checkout_commands(uri, pr_num, sha)
+    [
+      'git init',
+      "git remote add origin #{uri}",
+      "git fetch --depth 1 origin refs/pull/#{pr_num}/head:pr",
+      "git checkout #{sha}",
+      'git submodule update --init --recursive --depth 1'
+    ]
+  end
+
+  # Create the ssh_dir if it doesn't exist.
   def self.create_ssh_dir
     return if Dir.exist?(SSH_DIR)
 
     FileUtils.mkdir_p(SSH_DIR)
+    # Chmod the specific directory to be explicit that we only want the
+    # .ssh directory itself to be 0700, we don't care about anything leading
+    # up to it and that should be determined by umask.
     FileUtils.chmod(0700, SSH_DIR)
   end
 
@@ -151,7 +167,7 @@ class ResourceIn
     repo = get_repo_name(uri)
 
     meta = ResourceIn.get_commit_metadata(client, repo, sha)
-    ResourceIn.clone(uri, source['private_key'], pr_num, out_path)
+    ResourceIn.clone(uri, pr_num, sha, out_path, pkey: source['private_key'])
 
     { version: sha, metadata: meta }
   end
