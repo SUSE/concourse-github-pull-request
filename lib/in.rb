@@ -56,7 +56,7 @@ class ResourceIn
   # @param pr_num [Integer] The PR number.
   def self.checkout_pr(uri, pr_num, sha)
     checkout_commands(uri, pr_num, sha).each do |cmd|
-      status = spawn(*cmd.split(' '))
+      status = Utils.run_process(*cmd.split(' '))
       fail StandardError, "failed running: #{cmd}" unless status.success?
     end
   end
@@ -164,11 +164,10 @@ class ResourceIn
     pr_num, sha = ResourceIn.parse_version(config['version']['commit'])
 
     uri = source['uri']
-    repo = get_repo_name(uri)
 
-    meta = ResourceIn.get_commit_metadata(client, repo, sha)
+    meta = ResourceIn.get_commit_metadata(client, get_repo_name(uri), sha)
     ResourceIn.clone(uri, pr_num, sha, out_path, pkey: source['private_key'])
 
-    { version: sha, metadata: meta }
+    { version: config['version'], metadata: meta }
   end
 end

@@ -47,7 +47,7 @@ class ResourceCheck
   def self.fetch_prs(client, repo, branch: nil)
     prs = client.pull_requests(repo, state: 'open')
     return prs if branch.nil?
-    prs.reject! do |pr|
+    prs.delete_if do |pr|
       base_name = pr.base.label.split(':').last
       base_name != branch
     end

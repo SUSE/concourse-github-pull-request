@@ -62,7 +62,7 @@ context ResourceIn do
 
     output = resource.run
     expect(output[:metadata]).to eq(expect_meta)
-    expect(output[:version]).to eq(sha)
+    expect(output[:version]).to eq(config['version'])
   end
 
   it 'should get commit metadata' do
@@ -85,23 +85,23 @@ context ResourceIn do
 
     ref = "refs/pull/#{pr_num}/head:pr"
 
-    expect(ResourceIn).to receive(:spawn)
+    expect(Utils).to receive(:run_process)
       .with('git', 'init')
       .and_return(OpenStruct.new(success?: true))
       .ordered
-    expect(ResourceIn).to receive(:spawn)
+    expect(Utils).to receive(:run_process)
       .with('git', 'remote', 'add', 'origin', uri)
       .and_return(OpenStruct.new(success?: true))
       .ordered
-    expect(ResourceIn).to receive(:spawn)
+    expect(Utils).to receive(:run_process)
       .with('git', 'fetch', '--depth', '1', 'origin', ref)
       .and_return(OpenStruct.new(success?: true))
       .ordered
-    expect(ResourceIn).to receive(:spawn)
+    expect(Utils).to receive(:run_process)
       .with('git', 'checkout', sha)
       .and_return(OpenStruct.new(success?: true))
       .ordered
-    expect(ResourceIn).to receive(:spawn)
+    expect(Utils).to receive(:run_process)
       .with(*'git submodule update --init --recursive --depth 1'.split)
       .and_return(OpenStruct.new(success?: true))
       .ordered

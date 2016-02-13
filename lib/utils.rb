@@ -56,11 +56,11 @@ module Utils
                                   auto_paginate: true)
   end
 
-  # Spawn a process and return its status
+  # Run a process and return its status
   #
   # @param args [Array of String] command line to spawn
   # @returns [Process::Status] the exit status
-  def spawn(*args)
+  def self.run_process(*args)
     fileno = STDERR.fileno
     _, status = Process.wait2(Process.spawn(*args, out: fileno, err: fileno))
     status
