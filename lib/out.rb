@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require_relative 'utils'
+
 class NotAGitRepository < Exception
 end
 
