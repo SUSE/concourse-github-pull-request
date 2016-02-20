@@ -28,6 +28,15 @@ class ResourceOut
     abort
   end
 
+  def working_path
+    @working_path ||= ARGV.first.tap do |working_path|
+      fail if working_path.nil?
+    end
+  rescue StandardError
+    puts 'Working path missing, expected as first argument'
+    abort
+  end
+
   def path
     @path ||= params.fetch 'path'
   rescue KeyError
@@ -77,7 +86,7 @@ class ResourceOut
   end
 
   def sha
-    @sha ||= Dir.chdir path do
+    @sha ||= Dir.chdir "#{working_path}/#{path}" do
       `git rev-parse HEAD`.tap do |string|
         fail NotAGitRepository if string.empty?
       end
