@@ -27,6 +27,8 @@ a PR (the latest commit on any PR that doesn't have it's check).
 
 Pulls down a pull request ref from github.
 
-### `out`: This is a no-op.
-
-*None*.
+### `out`: Push a status to github
+- `path`: *Required* The path to the repository.
+- `state`: *Required* The state to set for this status.
+- `context`: *Optional* The context for the status. Defaults to `concourse`
+- `description`: *Optional* The description for the status.
