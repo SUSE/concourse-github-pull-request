@@ -36,7 +36,8 @@ class ResourceIn
   # @param sha    [String]  The commit hash to check out
   # @param dir    [String]  Directory to clone to
   # @param pkey   [String]  Private key to check out with
-  def self.clone(uri, pr_num, sha, dir, pkey: nil)
+  # @param depth  [Integer] A positive integer of how many commits deep to clone
+  def self.clone(uri, pr_num, sha, dir, pkey: nil, depth: nil)
     unless pkey.nil?
       write_ssh_config
       write_private_key(pkey)
@@ -45,17 +46,18 @@ class ResourceIn
     FileUtils.mkdir_p(dir)
 
     Dir.chdir(dir) do
-      checkout_pr(uri, pr_num, sha)
+      checkout_pr(uri, pr_num, sha, depth: depth)
     end
   end
 
   # Fetch and checkout a pr at some commit hash
   #
   # @param uri    [String]  The URI of the github repo.
-  # @param sha    [String]  The commit hash to check out
   # @param pr_num [Integer] The PR number.
-  def self.checkout_pr(uri, pr_num, sha)
-    checkout_commands(uri, pr_num, sha).each do |cmd|
+  # @param sha    [String]  The commit hash to check out
+  # @param depth  [Integer] A positive integer of how many commits deep to clone
+  def self.checkout_pr(uri, pr_num, sha, depth: nil)
+    checkout_commands(uri, pr_num, sha, depth: depth).each do |cmd|
       status = Utils.run_process(*cmd.split(' '))
       fail StandardError, "failed running: #{cmd}" unless status.success?
     end
@@ -66,14 +68,16 @@ class ResourceIn
   # @param uri    [String]  The URI of the github repo.
   # @param sha    [String]  The commit hash to check out
   # @param pr_num [Integer] The PR number.
+  # @param depth  [Integer] A positive integer of how many commits deep to clone
   # @return       [Array]   Array of git commands to run
-  def self.checkout_commands(uri, pr_num, sha)
+  def self.checkout_commands(uri, pr_num, sha, depth: nil)
+    depth_flag = depth ? " --depth #{depth}" : ''
     [
       'git init',
       "git remote add origin #{uri}",
-      "git fetch --depth 1 origin refs/pull/#{pr_num}/head:pr",
+      "git fetch#{depth_flag} origin refs/pull/#{pr_num}/head:pr",
       "git checkout #{sha}",
-      'git submodule update --init --recursive --depth 1'
+      "git submodule update --init --recursive#{depth_flag}"
     ]
   end
 
@@ -161,12 +165,15 @@ class ResourceIn
   #                  here is essentially the git commit information.
   def run
     source = config['source']
+    params = config['params']
     pr_num, sha = ResourceIn.parse_version(config['version']['commit'])
 
     uri = source['uri']
 
     meta = ResourceIn.get_commit_metadata(client, get_repo_name(uri), sha)
-    ResourceIn.clone(uri, pr_num, sha, out_path, pkey: source['private_key'])
+    ResourceIn.clone(uri, pr_num, sha, out_path,
+                     pkey: source['private_key'],
+                     depth: params ? params['depth'] : nil)
 
     { version: config['version'], metadata: meta }
   end

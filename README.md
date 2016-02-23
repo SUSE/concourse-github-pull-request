@@ -27,6 +27,10 @@ a PR (the latest commit on any PR that doesn't have it's check).
 
 Pulls down a pull request ref from github.
 
+## Params
+- `depth`: *Optional* A positive integer will provide a shallow clone of the repository.
+This may make certain things stop working but is more efficient.
+
 ### `out`: This is a no-op.
 
 *None*.
