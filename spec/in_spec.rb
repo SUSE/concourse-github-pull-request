@@ -57,7 +57,7 @@ context ResourceIn do
     resource = ResourceIn.new(client: client, config: config)
     expect(resource).to receive(:out_path).and_return('out')
     expect(ResourceIn).to receive(:clone)
-      .with(uri, pr_num, sha, 'out', pkey: nil)
+      .with(uri, pr_num, sha, 'out', pkey: nil, depth: nil)
       .and_return(nil)
 
     output = resource.run
@@ -109,7 +109,42 @@ context ResourceIn do
     expect(ResourceIn).to receive(:write_ssh_config)
     expect(ResourceIn).to receive(:write_private_key).with('pkey')
 
-    ResourceIn.clone(uri, pr_num, sha, 'dir', pkey: 'pkey')
+    ResourceIn.clone(uri, pr_num, sha, 'dir', pkey: 'pkey', depth: 1)
+  end
+
+  it 'should clone a repository without special options' do
+    expect(FileUtils).to receive(:mkdir_p).with('dir')
+    expect(Dir).to receive(:chdir) do |_dir, &block|
+      block.call
+    end
+
+    ref = "refs/pull/#{pr_num}/head:pr"
+
+    expect(Utils).to receive(:run_process)
+      .with('git', 'init')
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(Utils).to receive(:run_process)
+      .with('git', 'remote', 'add', 'origin', uri)
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(Utils).to receive(:run_process)
+      .with('git', 'fetch', 'origin', ref)
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(Utils).to receive(:run_process)
+      .with('git', 'checkout', sha)
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+    expect(Utils).to receive(:run_process)
+      .with(*'git submodule update --init --recursive'.split)
+      .and_return(OpenStruct.new(success?: true))
+      .ordered
+
+    expect(ResourceIn).to_not receive(:write_ssh_config)
+    expect(ResourceIn).to_not receive(:write_private_key).with('pkey')
+
+    ResourceIn.clone(uri, pr_num, sha, 'dir', pkey: nil, depth: nil)
   end
 
   it 'should write the ssh directory' do
