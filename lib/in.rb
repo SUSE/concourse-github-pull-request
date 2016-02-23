@@ -165,7 +165,7 @@ class ResourceIn
   #                  here is essentially the git commit information.
   def run
     source = config['source']
-    params = config['params']
+    params = config['params'] || {}
     pr_num, sha = ResourceIn.parse_version(config['version']['commit'])
 
     uri = source['uri']
@@ -173,7 +173,7 @@ class ResourceIn
     meta = ResourceIn.get_commit_metadata(client, get_repo_name(uri), sha)
     ResourceIn.clone(uri, pr_num, sha, out_path,
                      pkey: source['private_key'],
-                     depth: params ? params['depth'] : nil)
+                     depth: params['depth'])
 
     { version: config['version'], metadata: meta }
   end
