@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
     for accessing pull requests.
   EOF
   s.homepage    = 'https://github.com/hpcloud/concourse-github-pr-resource'
+  s.license     = 'MIT'
   s.authors     = ['Aaron L']
   s.email       = 'hcf-dev@hpe.com'
   s.files       = Dir.glob('lib/*')
