@@ -1,6 +1,6 @@
 FROM colstrom/alpine
 
-ADD . /opt/concourse-github-pr-resource/
+ADD . /opt/concourse-github-pull-request/
 
 RUN true \
     && apk add --update \
@@ -14,11 +14,11 @@ RUN true \
         openssl \
         ca-certificates \
     && echo "gem: --no-doc" | tee /etc/gemrc \
-    && cd /opt/concourse-github-pr-resource \
+    && cd /opt/concourse-github-pull-request \
     && bundle install --binstubs=/opt/resource/ --deployment --without=development,test \
     && apk del \
         ruby-io-console \
     && rm -rf \
-        /opt/concourse-github-pr-resource/vendor/bundle/ruby/2.2.0/cache/ \
+        /opt/concourse-github-pull-request/vendor/bundle/ruby/2.2.0/cache/ \
         /var/cache/apk/* \
     && true

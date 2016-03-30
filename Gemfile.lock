@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    concourse-github-pr-resource (0.1)
+    concourse-github-pull-request (0.1)
       octokit (~> 4.2)
 
 GEM
@@ -67,7 +67,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  concourse-github-pr-resource!
+  concourse-github-pull-request!
   inch
   octokit
   pry
