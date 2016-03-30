@@ -1,4 +1,4 @@
-# concourse-github-pr-resource
+# concourse-github-pull-request
 
 This is an implementation of a [concourse](http://concourse.ci/) resource 
 that deals with pull requests.

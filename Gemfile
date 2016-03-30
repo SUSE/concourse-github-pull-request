@@ -1,6 +1,6 @@
 source(ENV['RUBYGEMS_MIRROR'] || 'https://rubygems.org')
 
-gem 'concourse-github-pr-resource', path: '.'
+gem 'concourse-github-pull-request', path: '.'
 
 gem 'octokit'
 

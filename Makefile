@@ -1,9 +1,9 @@
-NAME ?= aarondl0/concourse-github-pr-resource:latest
+NAME ?= helioncf/concourse-github-pull-request:latest
 
 SOURCES := \
 	bin/ \
 	lib/ \
-	concourse-github-pr-resource.gemspec \
+	concourse-github-pull-request.gemspec \
 	Gemfile \
 	Gemfile.lock \
 	Dockerfile \
