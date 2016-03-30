@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'concourse-github-pr-resource'
-  s.version     = '0.1'
+  s.version     = '0.1.0'
   s.summary     = 'Github pull requests as a concourse resource'
   s.description = <<-EOF
     This is an implementation of a concourse (http://concourse.ci/) resource
