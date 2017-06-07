@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
     for accessing pull requests.
   EOF
   s.license     = 'MIT'
-  s.homepage    = 'https://github.com/hpe-cloud-garage/concourse-github-pull-request'
-  s.authors     = ['Aaron L']
-  s.email       = 'hcf-dev@hpe.com'
+  s.homepage    = 'https://github.com/suse/concourse-github-pull-request'
+  s.authors     = ['Aaron Lefkowitz']
+  s.email       = 'aaron.lefkowitz@suse.com'
   s.files       = Dir.glob('lib/*')
   s.license     = 'Apache-2.0'
   s.executables << 'in' << 'out' << 'check'

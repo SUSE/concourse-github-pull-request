@@ -4,7 +4,7 @@ require 'recursive-open-struct'
 
 context ResourceCheck do
   let(:client) { instance_double('Octokit::Client') }
-  let(:repo) { 'https://github.com/hpcloud/fun' }
+  let(:repo) { 'https://github.com/someorg/fun' }
   let(:sha1) { 'abdcef' }
   let(:sha2) { 'fecdba' }
   let(:commit1) { { sha: sha1 } }
@@ -25,7 +25,7 @@ context ResourceCheck do
     ]))
 
     expect(ResourceCheck).to receive(:set_commit_status)
-      .with(client, 'hpcloud/fun', sha2)
+      .with(client, 'someorg/fun', sha2)
 
     r = ResourceCheck.new(
       client: client, config: { 'source' => { 'uri' => repo } }
@@ -58,8 +58,8 @@ context ResourceCheck do
   describe 'fetch_prs' do
     it 'should fetch prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'hpcloud:master' } },
-        { base: { label: 'hpcloud:master' } }
+        { base: { label: 'someorg:master' } },
+        { base: { label: 'someorg:master' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo)
@@ -68,13 +68,13 @@ context ResourceCheck do
 
     it 'should filter fetched prs' do
       allow(client).to receive(:pull_requests).and_return(mk_structs([
-        { base: { label: 'hpcloud:master' } },
-        { base: { label: 'hpcloud:develop' } }
+        { base: { label: 'someorg:master' } },
+        { base: { label: 'someorg:develop' } }
       ]))
 
       prs = ResourceCheck.fetch_prs(client, repo, branch: 'develop')
       expect(prs.length).to eq(1)
-      expect(prs[0].base.label).to eq('hpcloud:develop')
+      expect(prs[0].base.label).to eq('someorg:develop')
     end
   end
 

@@ -4,8 +4,8 @@ require 'in'
 
 context ResourceIn do
   let(:client) { instance_double('Octokit::Client') }
-  let(:uri) { 'git@github.com:hpcloud/fun' }
-  let(:repo) { 'hpcloud/fun' }
+  let(:uri) { 'git@github.com:someorg/fun' }
+  let(:repo) { 'someorg/fun' }
   let(:branch) { 'branch' }
   let(:pr_num) { 5 }
   let(:sha) { 'abcdef' }
