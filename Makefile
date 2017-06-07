@@ -1,4 +1,4 @@
-NAME ?= helioncf/concourse-github-pull-request:latest
+NAME ?= splatform/concourse-github-pull-request:latest
 
 SOURCES := \
 	bin/ \
@@ -6,8 +6,7 @@ SOURCES := \
 	concourse-github-pull-request.gemspec \
 	Gemfile \
 	Gemfile.lock \
-	Dockerfile \
-	${NULL}
+	Dockerfile
 
 build:
 	# Use tar to ensure we don't accidentally include unexpected files
